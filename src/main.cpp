@@ -6,7 +6,6 @@
 #include <lgfx/v1/platforms/esp32s3/Bus_RGB.hpp>
 #include <lgfx/v1/platforms/esp32s3/Panel_RGB.hpp>
 #include <lvgl.h>
-// #include "touch.h"
 
 class LGFX : public lgfx::LGFX_Device {
 public:
@@ -77,6 +76,8 @@ public:
 LGFX lcd;
 
 #define TFT_BL 2
+SPIClass &spi = SPI;
+#include "touch.h"
 
 /* Change to your screen resolution */
 static uint32_t screenWidth;
