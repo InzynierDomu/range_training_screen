@@ -7,5 +7,5 @@
 
 void button_call_function(lv_event_t * e)
 {
-	// Your code here
+	sendMessage();
 }

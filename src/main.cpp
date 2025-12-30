@@ -3,6 +3,8 @@
 #include <Arduino.h>
 #include <LovyanGFX.hpp>
 #include <SPI.h>
+#include <WiFi.h>
+#include <esp_now.h>
 #include <lgfx/v1/platforms/esp32s3/Bus_RGB.hpp>
 #include <lgfx/v1/platforms/esp32s3/Panel_RGB.hpp>
 #include <lvgl.h>
@@ -73,6 +75,18 @@ public:
   }
 };
 
+// Struktura wiadomości - musi być identyczna na obu urządzeniach
+typedef struct {
+  int id;
+  float value;
+  char text[32];
+} message_t;
+
+message_t receivedMsg; // Przechowuje odebraną wiadomość
+message_t sendMsg;     // Wiadomość do wysłania
+
+uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+
 LGFX lcd;
 
 #define TFT_BL 2
@@ -108,7 +122,6 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
     if (touch_touched()) {
       data->state = LV_INDEV_STATE_PR;
 
-      /*Set the coordinates*/
       data->point.x = touch_last_x;
       data->point.y = touch_last_y;
       Serial.print("Data x ");
@@ -122,6 +135,33 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
     data->state = LV_INDEV_STATE_REL;
   }
   delay(15);
+}
+
+void sendMessage() {
+  sendMsg.id = 1;
+  sendMsg.value = random(0, 100) / 10.0;
+  strcpy(sendMsg.text, "Hello from Master!");
+
+  esp_err_t result =
+      esp_now_send(broadcastAddress, (uint8_t *)&sendMsg, sizeof(sendMsg));
+  if (result != ESP_OK) {
+    Serial.println("Blad wysylania");
+  }
+}
+
+// Callback po wysłaniu
+void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+  Serial.print("Wyslano: ");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "SUKCES" : "BLAD");
+}
+
+// Callback po odebraniu
+void OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
+  memcpy(&receivedMsg, data, sizeof(receivedMsg));
+  Serial.printf(
+      "Odebrano od %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%.1f, Text=%s\n",
+      mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], receivedMsg.id,
+      receivedMsg.value, receivedMsg.text);
 }
 
 void setup() {
@@ -157,6 +197,15 @@ void setup() {
   ui_init();
 
   lv_timer_handler();
+
+  WiFi.mode(WIFI_STA);
+  if (esp_now_init() != ESP_OK) {
+    Serial.println("Blad inicjalizacji ESP-NOW");
+    return;
+  }
+
+  esp_now_register_send_cb(OnDataSent);
+  esp_now_register_recv_cb(OnDataRecv);
 }
 
 void loop() {

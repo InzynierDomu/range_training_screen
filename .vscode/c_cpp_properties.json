@@ -9,6 +9,7 @@
             "name": "PlatformIO",
             "includePath": [
                 "C:/Users/markiszy/OneDrive - Tietoevry/Documents/PlatformIO/Projects/range_training_screen/src",
+                "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WiFi/src",
                 "C:/Users/markiszy/OneDrive - Tietoevry/Documents/PlatformIO/Projects/range_training_screen/.pio/libdeps/esp32-s3-devkitc-1-myboard/Adafruit GFX Library",
                 "C:/Users/markiszy/OneDrive - Tietoevry/Documents/PlatformIO/Projects/range_training_screen/.pio/libdeps/esp32-s3-devkitc-1-myboard/Adafruit BusIO",
                 "C:/Users/markiszy/OneDrive - Tietoevry/Documents/PlatformIO/Projects/range_training_screen/.pio/libdeps/esp32-s3-devkitc-1-myboard/PCA9557-arduino/src",
@@ -239,7 +240,6 @@
                 "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/USB/src",
                 "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/Update/src",
                 "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WebServer/src",
-                "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WiFi/src",
                 "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WiFiClientSecure/src",
                 "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WiFiProv/src",
                 ""
@@ -248,6 +248,7 @@
                 "limitSymbolsToIncludedHeaders": true,
                 "path": [
                     "C:/Users/markiszy/OneDrive - Tietoevry/Documents/PlatformIO/Projects/range_training_screen/src",
+                    "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WiFi/src",
                     "C:/Users/markiszy/OneDrive - Tietoevry/Documents/PlatformIO/Projects/range_training_screen/.pio/libdeps/esp32-s3-devkitc-1-myboard/Adafruit GFX Library",
                     "C:/Users/markiszy/OneDrive - Tietoevry/Documents/PlatformIO/Projects/range_training_screen/.pio/libdeps/esp32-s3-devkitc-1-myboard/Adafruit BusIO",
                     "C:/Users/markiszy/OneDrive - Tietoevry/Documents/PlatformIO/Projects/range_training_screen/.pio/libdeps/esp32-s3-devkitc-1-myboard/PCA9557-arduino/src",
@@ -478,7 +479,6 @@
                     "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/USB/src",
                     "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/Update/src",
                     "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WebServer/src",
-                    "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WiFi/src",
                     "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WiFiClientSecure/src",
                     "C:/Users/markiszy/.platformio/packages/framework-arduinoespressif32@src-87ac2a9d947aea8f7d6ce292db8f4c47/libraries/WiFiProv/src",
                     ""
