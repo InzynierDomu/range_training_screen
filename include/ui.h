@@ -35,6 +35,7 @@ extern "C" {
 // EVENTS
 
 extern lv_obj_t * ui____initial_actions0;
+void sendMessage();
 
 // FONTS
 LV_FONT_DECLARE(ui_font_Font1);

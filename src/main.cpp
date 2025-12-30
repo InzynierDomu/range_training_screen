@@ -1,4 +1,5 @@
 #include "ui.h"
+
 #include <Adafruit_GFX.h>
 #include <Arduino.h>
 #include <LovyanGFX.hpp>
@@ -9,26 +10,29 @@
 #include <lgfx/v1/platforms/esp32s3/Panel_RGB.hpp>
 #include <lvgl.h>
 
-class LGFX : public lgfx::LGFX_Device {
-public:
+
+class LGFX : public lgfx::LGFX_Device
+{
+  public:
   lgfx::Bus_RGB _bus_instance;
   lgfx::Panel_RGB _panel_instance;
-  LGFX(void) {
+  LGFX(void)
+  {
 
     {
       auto cfg = _bus_instance.config();
       cfg.panel = &_panel_instance;
 
       cfg.pin_d0 = GPIO_NUM_15; // B0
-      cfg.pin_d1 = GPIO_NUM_7;  // B1
-      cfg.pin_d2 = GPIO_NUM_6;  // B2
-      cfg.pin_d3 = GPIO_NUM_5;  // B3
-      cfg.pin_d4 = GPIO_NUM_4;  // B4
+      cfg.pin_d1 = GPIO_NUM_7; // B1
+      cfg.pin_d2 = GPIO_NUM_6; // B2
+      cfg.pin_d3 = GPIO_NUM_5; // B3
+      cfg.pin_d4 = GPIO_NUM_4; // B4
 
-      cfg.pin_d5 = GPIO_NUM_9;  // G0
+      cfg.pin_d5 = GPIO_NUM_9; // G0
       cfg.pin_d6 = GPIO_NUM_46; // G1
-      cfg.pin_d7 = GPIO_NUM_3;  // G2
-      cfg.pin_d8 = GPIO_NUM_8;  // G3
+      cfg.pin_d7 = GPIO_NUM_3; // G2
+      cfg.pin_d8 = GPIO_NUM_8; // G3
       cfg.pin_d9 = GPIO_NUM_16; // G4
       cfg.pin_d10 = GPIO_NUM_1; // G5
 
@@ -76,21 +80,22 @@ public:
 };
 
 // Struktura wiadomości - musi być identyczna na obu urządzeniach
-typedef struct {
+typedef struct
+{
   int id;
   float value;
   char text[32];
 } message_t;
 
 message_t receivedMsg; // Przechowuje odebraną wiadomość
-message_t sendMsg;     // Wiadomość do wysłania
+message_t sendMsg; // Wiadomość do wysłania
 
 uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
 
 LGFX lcd;
 
 #define TFT_BL 2
-SPIClass &spi = SPI;
+SPIClass& spi = SPI;
 #include "touch.h"
 
 /* Change to your screen resolution */
@@ -100,26 +105,28 @@ static lv_disp_draw_buf_t draw_buf;
 // static lv_color_t *disp_draw_buf;
 static lv_color_t disp_draw_buf[800 * 480 / 15];
 static lv_disp_drv_t disp_drv;
-void my_disp_flush(lv_disp_drv_t *disp, const lv_area_t *area,
-                   lv_color_t *color_p) {
+void my_disp_flush(lv_disp_drv_t* disp, const lv_area_t* area, lv_color_t* color_p)
+{
 
   uint32_t w = (area->x2 - area->x1 + 1);
   uint32_t h = (area->y2 - area->y1 + 1);
 
   // lcd.fillScreen(TFT_WHITE);
 #if (LV_COLOR_16_SWAP != 0)
-  lcd.pushImageDMA(area->x1, area->y1, w, h, (lgfx::rgb565_t *)&color_p->full);
+  lcd.pushImageDMA(area->x1, area->y1, w, h, (lgfx::rgb565_t*)&color_p->full);
 #else
   lcd.pushImageDMA(area->x1, area->y1, w, h,
-                   (lgfx::rgb565_t *)&color_p->full); //
+                   (lgfx::rgb565_t*)&color_p->full); //
 #endif
 
   lv_disp_flush_ready(disp);
 }
-
-void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
-  if (touch_has_signal()) {
-    if (touch_touched()) {
+void my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
+{
+  if (touch_has_signal())
+  {
+    if (touch_touched())
+    {
       data->state = LV_INDEV_STATE_PR;
 
       data->point.x = touch_last_x;
@@ -128,43 +135,55 @@ void my_touchpad_read(lv_indev_drv_t *indev_driver, lv_indev_data_t *data) {
       Serial.println(data->point.x);
       Serial.print("Data y ");
       Serial.println(data->point.y);
-    } else if (touch_released()) {
+    }
+    else if (touch_released())
+    {
       data->state = LV_INDEV_STATE_REL;
     }
-  } else {
+  }
+  else
+  {
     data->state = LV_INDEV_STATE_REL;
   }
   delay(15);
 }
-
-void sendMessage() {
+void sendMessage()
+{
   sendMsg.id = 1;
   sendMsg.value = random(0, 100) / 10.0;
   strcpy(sendMsg.text, "Hello from Master!");
+  Serial.println("wysylanie po esp now");
 
-  esp_err_t result =
-      esp_now_send(broadcastAddress, (uint8_t *)&sendMsg, sizeof(sendMsg));
-  if (result != ESP_OK) {
+  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
+  if (result != ESP_OK)
+  {
     Serial.println("Blad wysylania");
   }
 }
-
-// Callback po wysłaniu
-void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
+{
   Serial.print("Wyslano: ");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "SUKCES" : "BLAD");
 }
 
 // Callback po odebraniu
-void OnDataRecv(const uint8_t *mac, const uint8_t *data, int len) {
+void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
+{
   memcpy(&receivedMsg, data, sizeof(receivedMsg));
-  Serial.printf(
-      "Odebrano od %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%.1f, Text=%s\n",
-      mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], receivedMsg.id,
-      receivedMsg.value, receivedMsg.text);
+  Serial.printf("Odebrano od %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%.1f, Text=%s\n",
+                mac[0],
+                mac[1],
+                mac[2],
+                mac[3],
+                mac[4],
+                mac[5],
+                receivedMsg.id,
+                receivedMsg.value,
+                receivedMsg.text);
 }
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
 
   lcd.begin();
@@ -174,8 +193,7 @@ void setup() {
   screenWidth = lcd.width();
   screenHeight = lcd.height();
 
-  lv_disp_draw_buf_init(&draw_buf, disp_draw_buf, NULL,
-                        screenWidth * screenHeight / 15);
+  lv_disp_draw_buf_init(&draw_buf, disp_draw_buf, NULL, screenWidth * screenHeight / 15);
 
   lv_disp_drv_init(&disp_drv);
 
@@ -184,6 +202,12 @@ void setup() {
   disp_drv.flush_cb = my_disp_flush;
   disp_drv.draw_buf = &draw_buf;
   lv_disp_drv_register(&disp_drv);
+
+  static lv_indev_drv_t indev_drv;
+  lv_indev_drv_init(&indev_drv);
+  indev_drv.type = LV_INDEV_TYPE_POINTER;
+  indev_drv.read_cb = my_touchpad_read;
+  lv_indev_drv_register(&indev_drv);
 
   ledcSetup(1, 300, 8);
   ledcAttachPin(TFT_BL, 1);
@@ -199,16 +223,19 @@ void setup() {
   lv_timer_handler();
 
   WiFi.mode(WIFI_STA);
-  if (esp_now_init() != ESP_OK) {
+  if (esp_now_init() != ESP_OK)
+  {
     Serial.println("Blad inicjalizacji ESP-NOW");
     return;
   }
 
   esp_now_register_send_cb(OnDataSent);
   esp_now_register_recv_cb(OnDataRecv);
+  Serial.println("setup end");
 }
 
-void loop() {
+void loop()
+{
   lv_timer_handler();
   delay(10);
 }

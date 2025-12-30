@@ -7,5 +7,9 @@
 
 void button_call_function(lv_event_t * e)
 {
-	sendMessage();
+	lv_event_code_t code = lv_event_get_code(e);
+    if(code == LV_EVENT_CLICKED) {
+ sendMessage();
+// test_bool = true;
+    }
 }
