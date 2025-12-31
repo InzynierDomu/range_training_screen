@@ -90,7 +90,8 @@ typedef struct
 message_t receivedMsg; // Przechowuje odebraną wiadomość
 message_t sendMsg; // Wiadomość do wysłania
 
-uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+// uint8_t broadcastAddress[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};
+uint8_t peerAddress[] = {0x3C, 0xE9, 0x0E, 0x7F, 0x30, 0x58};
 
 LGFX lcd;
 
@@ -154,9 +155,11 @@ void sendMessage()
   strcpy(sendMsg.text, "Hello from Master!");
   Serial.println("wysylanie po esp now");
 
-  esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
+  // esp_err_t result = esp_now_send(broadcastAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
+  esp_err_t result = esp_now_send(peerAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
   if (result != ESP_OK)
   {
+    Serial.println(result);
     Serial.println("Blad wysylania");
   }
 }
@@ -229,8 +232,29 @@ void setup()
     return;
   }
 
+  Serial.print("MAC: ");
+  Serial.println(WiFi.macAddress());
+
+  // rejestracja callbacku wysylania, jeśli masz
   esp_now_register_send_cb(OnDataSent);
+
+  // --- nowy kod: dodanie peera ---
+  esp_now_peer_info_t peerInfo = {};
+  memcpy(peerInfo.peer_addr, peerAddress, 6);
+  peerInfo.channel = 0; // ten sam kanał na obu ESP, 0 = aktualny
+  peerInfo.encrypt = false; // na razie bez szyfrowania
+
+  esp_err_t addStatus = esp_now_add_peer(&peerInfo);
+  Serial.print("add_peer status: ");
+  Serial.println(addStatus); // 0 = ESP_OK
+
+  if (addStatus != ESP_OK)
+  {
+    Serial.println("Nie udalo sie dodac peera");
+  }
+
   esp_now_register_recv_cb(OnDataRecv);
+
   Serial.println("setup end");
 }
 
