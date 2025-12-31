@@ -18,10 +18,7 @@ typedef struct
 
 message_t myData;
 
-// MAC mastera z poprzedniego kodu (dostosuj po odczycie z Seriala mastera!)
-// uint8_t masterMac[] = {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF};  // Zamień na
-// realny MAC
-uint8_t masterMac[] = {0x20, 0x6E, 0xF1, 0x87, 0xBA, 0x9C}; // Zamień na realny MAC
+uint8_t masterMac[] = {0x20, 0x6E, 0xF1, 0x87, 0xBA, 0x9C}; // MAC mastera
 
 void send_msg()
 {
@@ -86,23 +83,16 @@ void OnDataRecv(const uint8_t* mac, const uint8_t* incomingData, int len)
 void setup()
 {
   Serial.begin(115200);
-
-  // HWCDC potrzebuje czasu na inicjalizację (2-3s)
-  // delay(3000);
-  // while (!Serial && millis() < 8000)
-    ; // Czekaj max 8s
   Serial.println("setup start"); 
 
   WiFi.mode(WIFI_STA);
 
-  // Inicjalizacja ESP-NOW
   if (esp_now_init() != ESP_OK)
   {
     Serial.println("Błąd inicjalizacji ESP-NOW");
     return;
   }
 
-  // Rejestracja callback
   esp_now_register_recv_cb(OnDataRecv);
 
   delay(1000);
