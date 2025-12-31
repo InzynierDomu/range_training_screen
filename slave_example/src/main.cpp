@@ -79,6 +79,7 @@ void OnDataRecv(const uint8_t* mac, const uint8_t* incomingData, int len)
   led_status = true;
   timer = millis();
   digitalWrite(LED_BUILTIN, HIGH);
+  Serial.println("led_high");
   msg_recived = true;
 }
 
@@ -113,6 +114,7 @@ void setup()
 
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LOW);
+  Serial.println("led_low");
   Serial.println("setup end");
 }
 void loop()
@@ -123,6 +125,7 @@ void loop()
     {
       led_status = false;
       digitalWrite(LED_BUILTIN, LOW);
+      Serial.println("led_low");
     }
   }
 

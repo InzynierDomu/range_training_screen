@@ -10,7 +10,6 @@
 #include <lgfx/v1/platforms/esp32s3/Panel_RGB.hpp>
 #include <lvgl.h>
 
-
 class LGFX : public lgfx::LGFX_Device
 {
   public:
@@ -18,7 +17,6 @@ class LGFX : public lgfx::LGFX_Device
   lgfx::Panel_RGB _panel_instance;
   LGFX(void)
   {
-
     {
       auto cfg = _bus_instance.config();
       cfg.panel = &_panel_instance;
@@ -183,6 +181,8 @@ void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
                 receivedMsg.id,
                 receivedMsg.value,
                 receivedMsg.text);
+
+  lv_label_set_text(ui_Label, receivedMsg.text);
 }
 
 void setup()
