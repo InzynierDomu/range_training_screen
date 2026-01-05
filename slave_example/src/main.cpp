@@ -12,8 +12,10 @@
 Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 const uint32_t m_on_led_time = 1000;
+const uint32_t MAC_time = 5000;
 volatile bool led_status = false;
 volatile long timer = 0;
+long MAC_timer = 0;
 volatile bool msg_recived;
 
 // Struktura wiadomości (ta sama co w masterze)
@@ -95,7 +97,7 @@ void setup()
   strip.setPixelColor(0, strip.Color(255, 0, 0));
   strip.show();
 
-  Serial1.begin(115200);
+  Serial.begin(115200);
   Serial.println("setup start");
 
   WiFi.mode(WIFI_STA);
@@ -136,5 +138,12 @@ void loop()
   {
     send_msg();
     msg_recived = false;
+  }
+
+  if (millis() - MAC_timer > MAC_time)
+  {
+    Serial.print("MAC Slave: ");
+    Serial.println(WiFi.macAddress());
+    MAC_timer = millis();
   }
 }
