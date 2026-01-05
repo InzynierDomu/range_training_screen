@@ -1,7 +1,16 @@
+#include <Adafruit_NeoPixel.h>
 #include <Arduino.h>
 #include <WiFi.h>
 #include <esp_now.h>
-// #include <Adafruit_NeoPixel.h>
+
+
+#define LED_PIN 10 // WS2812 na ESP32-C3-Zero
+#define LED_COUNT 1 // tylko 1 dioda na płytce
+
+#define RX1_PIN 3 // odbiór z konwertera USB-UART
+#define TX1_PIN 2 // wysyłanie do konwertera USB-UART
+
+Adafruit_NeoPixel strip(LED_COUNT, LED_PIN, NEO_GRB + NEO_KHZ800);
 
 const uint32_t m_on_led_time = 1000;
 volatile bool led_status = false;
@@ -35,61 +44,66 @@ void send_msg()
     peerInfo.encrypt = false;
     if (esp_now_add_peer(&peerInfo) != ESP_OK)
     {
-      Serial.println("Failed to add peer");
+      // Serial1.println("Failed to add peer");
       return;
     }
   }
   else
   {
-    Serial.println("master peer exist");
+    // Serial1.println("master peer exist");
   }
 
   esp_err_t result = esp_now_send(masterMac, (uint8_t*)&myData, sizeof(myData));
   if (result == ESP_OK)
   {
-    Serial.println("Wysłano do mastera: OK");
+    // Serial1.println("Wysłano do mastera: OK");
   }
   else
   {
-    Serial.println(result);
-    Serial.println("Błąd wysyłania");
+    // Serial1.println(result);
+    // Serial1.println("Błąd wysyłania");
   }
 }
 
 void OnDataRecv(const uint8_t* mac, const uint8_t* incomingData, int len)
 {
   memcpy(&myData, incomingData, sizeof(myData));
-  Serial.print("Odebrano od: ");
-  Serial.print(mac[0], HEX);
-  Serial.print(":");
-  Serial.print(mac[1], HEX);
-  Serial.print(":");
-  Serial.print(mac[2], HEX);
-  Serial.print(":");
-  Serial.print(mac[3], HEX);
-  Serial.print(":");
-  Serial.print(mac[4], HEX);
-  Serial.print(":");
-  Serial.println(mac[5], HEX);
-  Serial.printf("ID: %d, Value: %.2f, Msg: %s\n", myData.id, myData.value, myData.msg);
+  // Serial1.print("Odebrano od: ");
+  // Serial1.print(mac[0], HEX);
+  // Serial1.print(":");
+  // Serial1.print(mac[1], HEX);
+  // Serial1.print(":");
+  // Serial1.print(mac[2], HEX);
+  // Serial1.print(":");
+  // Serial1.print(mac[3], HEX);
+  // Serial1.print(":");
+  // Serial1.print(mac[4], HEX);
+  // Serial1.print(":");
+  // Serial1.println(mac[5], HEX);
+  // Serial1.printf("ID: %d, Value: %.2f, Msg: %s\n", myData.id, myData.value, myData.msg);
 
   led_status = true;
   timer = millis();
-  digitalWrite(LED_BUILTIN, HIGH);
-  Serial.println("led_high");
+  strip.setPixelColor(0, strip.Color(0, 0, 255));
+  // Serial1.println("led_high");
   msg_recived = true;
 }
 
 void setup()
 {
-  Serial.begin(115200);
-  Serial.println("setup start"); 
+  strip.begin(); // inicjalizacja NeoPixel
+
+  strip.setPixelColor(0, strip.Color(255, 0, 0));
+  strip.show();
+
+  // Serial1.begin(115200, SERIAL_8N1, RX1_PIN, TX1_PIN);
+  // Serial1.println("setup start");
 
   WiFi.mode(WIFI_STA);
 
   if (esp_now_init() != ESP_OK)
   {
-    Serial.println("Błąd inicjalizacji ESP-NOW");
+    Serial1.println("Błąd inicjalizacji ESP-NOW");
     return;
   }
 
@@ -97,15 +111,15 @@ void setup()
 
   delay(1000);
 
-  Serial.println("ESP32-C3-Zero SLAVE gotowy. Kanał WiFi: " + String(WiFi.channel()));
-  Serial.print("MAC Slave: ");
-  Serial.println(WiFi.macAddress());
+  // Serial1.println("ESP32-C3-Zero SLAVE gotowy. Kanał WiFi: " + String(WiFi.channel()));
+  // Serial1.print("MAC Slave: ");
+  // Serial1.println(WiFi.macAddress());
 
+  // Serial1.println("led_low");
+  // Serial1.println("setup end");
 
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LOW);
-  Serial.println("led_low");
-  Serial.println("setup end");
+  strip.setPixelColor(0, strip.Color(0, 255, 0));
+  strip.show();
 }
 void loop()
 {
@@ -114,8 +128,8 @@ void loop()
     if (millis() - timer > m_on_led_time)
     {
       led_status = false;
-      digitalWrite(LED_BUILTIN, LOW);
-      Serial.println("led_low");
+      strip.setPixelColor(0, strip.Color(0, 255, 0));
+      // Serial1.println("led_low");
     }
   }
 

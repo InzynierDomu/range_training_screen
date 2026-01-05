@@ -88,7 +88,7 @@ typedef struct
 message_t receivedMsg; // Przechowuje odebraną wiadomość
 message_t sendMsg; // Wiadomość do wysłania
 
-uint8_t peerAddress[] = {0x3C, 0xE9, 0x0E, 0x7F, 0x30, 0x58};
+uint8_t peerAddress[] = {0xDC, 0x1E, 0xD5, 0xE5, 0xCD, 0x5C};
 
 LGFX lcd;
 
