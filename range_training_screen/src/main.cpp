@@ -88,7 +88,7 @@ typedef struct
 message_t receivedMsg; // Przechowuje odebraną wiadomość
 message_t sendMsg; // Wiadomość do wysłania
 
-uint8_t peerAddress[] = {0xDC, 0x1E, 0xD5, 0xE5, 0xCD, 0x5C};
+uint8_t peerAddress[] = {0xDC, 0x1E, 0xD5, 0xE5, 0xCD, 0x5C}; // MAC urządzenia do którego będzie wysyłana wiadomość, trzeba odczytać tam i wpisać tutaj
 
 LGFX lcd;
 
@@ -142,31 +142,33 @@ void my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
   }
   delay(15);
 }
+
+// wysyłanie wiadomości
 void sendMessage()
 {
-  sendMsg.id = 1;
-  sendMsg.value = random(0, 100) / 10.0;
+  sendMsg.id = 1; // id dla porządku
+  sendMsg.value = random(0, 100) / 10.0; //dummy value
   strcpy(sendMsg.text, "Hello from Master!");
-  Serial.println("wysylanie po esp now");
+  Serial.println("Sending via esp now");
 
   esp_err_t result = esp_now_send(peerAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
   if (result != ESP_OK)
   {
     Serial.println(result);
-    Serial.println("Blad wysylania");
+    Serial.println("Sending error");
   }
 }
 void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
 {
-  Serial.print("Wyslano: ");
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "SUKCES" : "BLAD");
+  Serial.print("Sending: ");
+  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "ok" : "error");
 }
 
-// Callback po odebraniu
+// ta funkcja jest wywoływana jak przychodzi wiadomość po esp now, np. od slave można wykorzsytać do czegoś np. myData.value, myData.msg
 void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
 {
   memcpy(&receivedMsg, data, sizeof(receivedMsg));
-  Serial.printf("Odebrano od %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%.1f, Text=%s\n",
+  Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%.1f, Text=%s\n",
                 mac[0],
                 mac[1],
                 mac[2],
@@ -182,7 +184,7 @@ void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
 
 void setup()
 {
-  Serial.begin(9600);
+  Serial.begin(115200);
 
   lcd.begin();
   lv_init();
@@ -243,12 +245,10 @@ void setup()
 
   if (addStatus != ESP_OK)
   {
-    Serial.println("Nie udalo sie dodac peera");
+    Serial.println("adding peer error");
   }
 
   esp_now_register_recv_cb(OnDataRecv);
-
-  Serial.println("setup end");
 }
 
 void loop()
