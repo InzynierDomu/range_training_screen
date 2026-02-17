@@ -1,14 +1,31 @@
+#include "actions.h"
 #include "ui.h"
 
-#include <Adafruit_GFX.h>
 #include <Arduino.h>
 #include <LovyanGFX.hpp>
 #include <SPI.h>
+#include <WebServer.h>
 #include <WiFi.h>
 #include <esp_now.h>
 #include <lgfx/v1/platforms/esp32s3/Bus_RGB.hpp>
 #include <lgfx/v1/platforms/esp32s3/Panel_RGB.hpp>
 #include <lvgl.h>
+
+
+const char* apSsid = "Strzelinca";
+const char* apPass = "inzynierDomu";
+
+enum class Program
+{
+  havy_fire,
+  dynamic,
+  cover_fiire,
+  training,
+  hostage,
+  none
+};
+
+Program program;
 
 class LGFX : public lgfx::LGFX_Device
 {
@@ -81,14 +98,15 @@ class LGFX : public lgfx::LGFX_Device
 typedef struct
 {
   int id;
-  float value;
-  char text[32];
+  uint8_t value;
 } message_t;
 
 message_t receivedMsg; // Przechowuje odebraną wiadomość
 message_t sendMsg; // Wiadomość do wysłania
+WebServer server(80);
 
-uint8_t peerAddress[] = {0xDC, 0x1E, 0xD5, 0xE5, 0xCD, 0x5C}; // MAC urządzenia do którego będzie wysyłana wiadomość, trzeba odczytać tam i wpisać tutaj
+uint8_t peerAddress[] = {
+    0x3C, 0xE9, 0x0E, 0x7F, 0x30, 0x58}; // MAC urządzenia do którego będzie wysyłana wiadomość, trzeba odczytać tam i wpisać tutaj
 
 LGFX lcd;
 
@@ -147,8 +165,7 @@ void my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
 void sendMessage()
 {
   sendMsg.id = 1; // id dla porządku
-  sendMsg.value = random(0, 100) / 10.0; //dummy value
-  strcpy(sendMsg.text, "Hello from Master!");
+  sendMsg.value = 1; // dummy value
   Serial.println("Sending via esp now");
 
   esp_err_t result = esp_now_send(peerAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
@@ -168,7 +185,7 @@ void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
 void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
 {
   memcpy(&receivedMsg, data, sizeof(receivedMsg));
-  Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%.1f, Text=%s\n",
+  Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%.1f",
                 mac[0],
                 mac[1],
                 mac[2],
@@ -176,12 +193,34 @@ void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
                 mac[4],
                 mac[5],
                 receivedMsg.id,
-                receivedMsg.value,
-                receivedMsg.text);
+                receivedMsg.value);
 
-  lv_label_set_text(ui_Label, receivedMsg.text);
+  // lv_label_set_text(ui_Label, receivedMsg.text);
 }
 
+static unsigned long hv_start_ms = 0;
+void hv_start(void)
+{
+  program = Program::havy_fire;
+  hv_start_ms = millis();
+  lv_textarea_set_text(ui_hvtimer, "0.00");
+  lv_textarea_set_text(ui_hvresult, "0");
+  sendMessage();
+}
+
+void hv_stop(void)
+{
+  program = Program::none;
+}
+
+void handleRoot()
+{
+  server.send(200,
+              "text/html",
+              "<html><body><h1>HV Timer</h1>"
+              "<p>Device is running.</p>"
+              "</body></html>");
+}
 void setup()
 {
   Serial.begin(115200);
@@ -222,15 +261,24 @@ void setup()
 
   lv_timer_handler();
 
-  WiFi.mode(WIFI_STA);
+  WiFi.mode(WIFI_AP_STA); // AP + (opcjonalnie STA)
+
+  WiFi.softAP(apSsid, apPass); // TODO: check
+
   if (esp_now_init() != ESP_OK)
   {
     Serial.println("Blad inicjalizacji ESP-NOW");
     return;
   }
 
+  server.on("/", handleRoot);
+  server.begin();
+  Serial.println("HTTP server started");
+
   Serial.print("MAC: ");
   Serial.println(WiFi.macAddress());
+  Serial.println(WiFi.localIP());
+  Serial.println(WiFi.channel());
 
   esp_now_register_send_cb(OnDataSent);
 
@@ -243,16 +291,42 @@ void setup()
   Serial.print("add_peer status: ");
   Serial.println(addStatus);
 
+
   if (addStatus != ESP_OK)
   {
     Serial.println("adding peer error");
   }
 
   esp_now_register_recv_cb(OnDataRecv);
+
+  program = Program::none;
 }
 
 void loop()
 {
   lv_timer_handler();
-  delay(10);
+  delay(5);
+
+  if (program == Program::havy_fire)
+  {
+    unsigned long now = millis();
+    float elapsed = (now - hv_start_ms) / 1000.0f; // ile sekund minęło
+
+    if (elapsed >= 10.0f)
+    {
+      elapsed = 10.0f;
+      program = Program::none;
+    }
+
+    // zaokrąglenie do 2 miejsc, żeby np. 1.999 → 2.00
+    int centis = (int)(elapsed * 100 + 0.5f);
+    int sec = centis / 100;
+    int cs = centis % 100;
+
+    char buf[16];
+    snprintf(buf, sizeof(buf), "%d.%02d", sec, cs);
+    lv_textarea_set_text(ui_hvtimer, buf);
+  }
+
+  server.handleClient();
 }
