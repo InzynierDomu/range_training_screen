@@ -7,21 +7,22 @@
 #define _UI_EVENTS_H
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
-void hv_start_clbk(lv_event_t * e);
-void hv_stop_clbk(lv_event_t * e);
-void hv_stop_clb(lv_event_t * e);
-void hv_program_set(lv_event_t * e);
-void cf_start_clbk(lv_event_t * e);
-void cf_stop_clbk(lv_event_t * e);
-void dynamic_start_clbk(lv_event_t * e);
-void dynamic_stop_clbk(lv_event_t * e);
-void training_start_clbk(lv_event_t * e);
-void training_stop_clbk(lv_event_t * e);
-void hostage_start_clbk(lv_event_t * e);
-void hostage_stop_clbk(lv_event_t * e);
+  void hv_start_clbk(lv_event_t* e);
+  void hv_stop_clbk(lv_event_t* e);
+  void hv_stop_clb(lv_event_t* e);
+  void hv_program_set(lv_event_t* e);
+  void cf_start_clbk(lv_event_t* e);
+  void cf_stop_clbk(lv_event_t* e);
+  void dynamic_start_clbk(lv_event_t* e);
+  void dynamic_stop_clbk(lv_event_t* e);
+  void training_start_clbk(lv_event_t* e);
+  void training_stop_clbk(lv_event_t* e);
+  void hostage_start_clbk(lv_event_t* e);
+  void hostage_stop_clbk(lv_event_t* e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

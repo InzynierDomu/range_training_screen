@@ -15,11 +15,6 @@ void hv_stop_clbk(lv_event_t * e)
 	// Your code here
 }
 
-void hv_stop(lv_event_t * e)
-{
-	// Your code here
-}
-
 void hv_program_set(lv_event_t * e)
 {
 	// Your code here
