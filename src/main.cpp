@@ -14,6 +14,7 @@
 #include <lgfx/v1/platforms/esp32s3/Bus_RGB.hpp>
 #include <lgfx/v1/platforms/esp32s3/Panel_RGB.hpp>
 #include <lvgl.h>
+#include <vector>
 
 
 const char* apSsid = "Strzelinca";
@@ -52,7 +53,7 @@ class LGFX : public lgfx::LGFX_Device
       cfg.pin_d6 = GPIO_NUM_46; // G1
       cfg.pin_d7 = GPIO_NUM_3; // G2
       cfg.pin_d8 = GPIO_NUM_8; // G3
-      cfg.pin_d9 = GPIO_NUM_16; // G4
+      cfg.pin_d9 = GPIO_NUM_16; // GS4
       cfg.pin_d10 = GPIO_NUM_1; // G5
 
       cfg.pin_d11 = GPIO_NUM_14; // R0
@@ -99,9 +100,18 @@ class LGFX : public lgfx::LGFX_Device
 };
 
 
-extern std::vector<Shield*> shields; // globalny lub dostępny w main
+std::vector<Shield*> shields; // globalny lub dostępny w main
 bool loadShieldsConfig(const char* filename)
 {
+  if (!SD.begin())
+  {
+    Serial.println("no SD card");
+  }
+  else
+  {
+    Serial.println("SD card ok");
+  }
+
   File file = SD.open(filename);
   if (!file)
   {
@@ -241,7 +251,7 @@ void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
 void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
 {
   memcpy(&receivedMsg, data, sizeof(receivedMsg));
-  Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%.1f",
+  Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%d",
                 mac[0],
                 mac[1],
                 mac[2],
@@ -353,7 +363,7 @@ void setup()
     Serial.println("adding peer error");
   }
 
-  if (loadShieldsConfig("/shields.json"))
+  if (loadShieldsConfig("/config.json"))
   {
     Serial.printf("Załadowano %d tarcz z pliku.\n", shields.size());
   }
