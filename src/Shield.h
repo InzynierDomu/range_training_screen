@@ -1,6 +1,6 @@
 #pragma once
 
-#include "functional"
+#include <functional>
 
 enum Shield_state
 {
@@ -23,6 +23,7 @@ class Shield
   Shield_state get_state() const;
   void set_state(Shield_state state);
   void set_hit_callback(HitCallback callback);
+  void handleMessage(const uint8_t* data, int len);
 
   private:
   void send_esp_now(uint8_t value);
