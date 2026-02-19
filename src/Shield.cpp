@@ -2,6 +2,8 @@
 
 #include "Frame.h"
 
+#include <Arduino.h>
+#include <cstring>
 #include <esp_now.h>
 
 Shield::Shield(uint8_t id, const uint8_t mac[6])
