@@ -101,7 +101,8 @@ class LGFX : public lgfx::LGFX_Device
 };
 
 
-Shield_manager Shield_manager; // globalny lub dostępny w main
+Shield_manager shield_manager;
+// globalny lub dostępny w main
 bool loadShieldsConfig(const char* filename)
 {
   if (!SD.begin())
@@ -153,7 +154,7 @@ bool loadShieldsConfig(const char* filename)
     }
 
     auto* shield = new Shield(id, mac);
-    Shield_manager.addShield(shield);
+    shield_manager.addShield(shield);
 
     Serial.printf("✅ Załadowano tarczę ID=%d, MAC=%02X:%02X:%02X:%02X:%02X:%02X\n", id, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   }
