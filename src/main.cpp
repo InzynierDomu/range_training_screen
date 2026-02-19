@@ -1,8 +1,12 @@
+#include "Frame.h"
+#include "Shield.h"
 #include "actions.h"
 #include "ui.h"
 
 #include <Arduino.h>
+#include <ArduinoJson.h>
 #include <LovyanGFX.hpp>
+#include <SD.h>
 #include <SPI.h>
 #include <WebServer.h>
 #include <WiFi.h>
@@ -94,15 +98,67 @@ class LGFX : public lgfx::LGFX_Device
   }
 };
 
-// Struktura wiadomości - musi być identyczna na obu urządzeniach
-typedef struct
+
+extern std::vector<Shield*> shields; // globalny lub dostępny w main
+bool loadShieldsConfig(const char* filename)
 {
-  int id;
-  uint8_t value;
-} message_t;
+  File file = SD.open(filename);
+  if (!file)
+  {
+    Serial.println("❌ Nie można otworzyć pliku konfiguracji.");
+    return false;
+  }
+
+  // Szacowane 1–2kB wystarczy przy kilku tarczach
+  StaticJsonDocument<2048> doc;
+  DeserializationError error = deserializeJson(doc, file);
+  file.close();
+
+  if (error)
+  {
+    Serial.printf("❌ Błąd parsowania JSON: %s\n", error.c_str());
+    return false;
+  }
+
+  JsonArray arr = doc["shields"].as<JsonArray>();
+  if (arr.isNull())
+  {
+    Serial.println("⚠️ Nie znaleziono tablicy 'shields' w pliku.");
+    return false;
+  }
+
+  for (JsonObject obj : arr)
+  {
+    uint8_t id = obj["id"] | 0;
+
+    uint8_t mac[6];
+    JsonArray macArr = obj["mac"].as<JsonArray>();
+    if (!macArr || macArr.size() != 6)
+      continue;
+
+    for (uint8_t i = 0; i < 6; ++i)
+    {
+      mac[i] = macArr[i].as<uint8_t>();
+    }
+
+    auto* shield = new Shield(id, mac);
+    shields.push_back(shield);
+
+    Serial.printf("✅ Załadowano tarczę ID=%d, MAC=%02X:%02X:%02X:%02X:%02X:%02X\n", id, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+  }
+
+  return true;
+}
+
+// Struktura wiadomości - musi być identyczna na obu urządzeniach
+// typedef struct
+// {
+//   int id;
+//   uint8_t value;
+// } message_t;
 
 message_t receivedMsg; // Przechowuje odebraną wiadomość
-message_t sendMsg; // Wiadomość do wysłania
+// message_t sendMsg; // Wiadomość do wysłania
 WebServer server(80);
 
 uint8_t peerAddress[] = {
@@ -162,19 +218,19 @@ void my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
 }
 
 // wysyłanie wiadomości
-void sendMessage()
-{
-  sendMsg.id = 1; // id dla porządku
-  sendMsg.value = 1; // dummy value
-  Serial.println("Sending via esp now");
+// void sendMessage()
+// {
+//   sendMsg.id = 1; // id dla porządku
+//   sendMsg.value = 1; // dummy value
+//   Serial.println("Sending via esp now");
 
-  esp_err_t result = esp_now_send(peerAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
-  if (result != ESP_OK)
-  {
-    Serial.println(result);
-    Serial.println("Sending error");
-  }
-}
+//   esp_err_t result = esp_now_send(peerAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
+//   if (result != ESP_OK)
+//   {
+//     Serial.println(result);
+//     Serial.println("Sending error");
+//   }
+// }
 void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
 {
   Serial.print("Sending: ");
@@ -205,7 +261,7 @@ void hv_start(void)
   hv_start_ms = millis();
   lv_textarea_set_text(ui_hvtimer, "0.00");
   lv_textarea_set_text(ui_hvresult, "0");
-  sendMessage();
+  // sendMessage();
 }
 
 void hv_stop(void)
@@ -295,6 +351,11 @@ void setup()
   if (addStatus != ESP_OK)
   {
     Serial.println("adding peer error");
+  }
+
+  if (loadShieldsConfig("/shields.json"))
+  {
+    Serial.printf("Załadowano %d tarcz z pliku.\n", shields.size());
   }
 
   esp_now_register_recv_cb(OnDataRecv);
