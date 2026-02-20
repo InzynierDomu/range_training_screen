@@ -1,4 +1,6 @@
 #include "Frame.h"
+#include "Havy_fire.h"
+#include "Program.h"
 #include "Shield.h"
 #include "Shield_manager.h"
 #include "actions.h"
@@ -15,6 +17,7 @@
 #include <lgfx/v1/platforms/esp32s3/Bus_RGB.hpp>
 #include <lgfx/v1/platforms/esp32s3/Panel_RGB.hpp>
 #include <lvgl.h>
+#include <memory>
 #include <vector>
 
 
@@ -102,6 +105,7 @@ class LGFX : public lgfx::LGFX_Device
 
 
 Shield_manager shield_manager;
+std::unique_ptr<Shoting_program> activeProgram;
 // globalny lub dostępny w main
 bool loadShieldsConfig(const char* filename)
 {
@@ -160,6 +164,19 @@ bool loadShieldsConfig(const char* filename)
   }
 
   return true;
+}
+
+void switchProgram(std::unique_ptr<Shoting_program> program)
+{
+  if (activeProgram)
+  {
+    activeProgram->stop();
+  }
+  activeProgram = std::move(program);
+  if (activeProgram)
+  {
+    activeProgram->start();
+  }
 }
 
 // Struktura wiadomości - musi być identyczna na obu urządzeniach
@@ -274,6 +291,7 @@ void hv_start(void)
   // lv_textarea_set_text(ui_hvtimer, "0.00");
   // lv_textarea_set_text(ui_hvresult, "0");
   // sendMessage();
+  switchProgram(std::make_unique<Havy_fire>(shield_manager));
 }
 
 void hv_stop(void)

@@ -17,7 +17,7 @@ void hv_stop_clbk(lv_event_t * e)
 
 void hv_program_set(lv_event_t * e)
 {
-	// Your code here
+	hv_start();
 }
 
 void cf_start_clbk(lv_event_t * e)

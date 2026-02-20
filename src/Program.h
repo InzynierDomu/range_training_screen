@@ -1,10 +1,16 @@
 #pragma once
 
+#include "Shield_manager.h"
+
 #include <Arduino.h>
+
 
 class Shoting_program
 {
   public:
+  Shoting_program(Shield_manager& _manager)
+  : manager(_manager)
+  {}
   virtual ~Shoting_program() {}
 
   void start()
@@ -44,6 +50,7 @@ class Shoting_program
     elapsed = millis() - startTime;
   }
 
+  Shield_manager& manager;
   bool running = false;
   unsigned long startTime = 0;
   unsigned long elapsed = 0;
