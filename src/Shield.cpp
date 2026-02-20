@@ -34,6 +34,8 @@ void Shield::set_hit_callback(HitCallback callback)
   onHit = callback;
 }
 
+void Shield::handle_message(const uint8_t* data, int len) {}
+
 void Shield::send_esp_now(uint8_t value)
 {
   message_t sendMsg;
