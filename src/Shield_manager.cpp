@@ -5,7 +5,7 @@ void Shield_manager::setGlobalHitCallback(HitCallback cb)
   globalHitCallback = cb;
 }
 
-void Shield_manager::handle_message(const uint8_t* mac, const message_t& msg)
+void Shield_manager::handle_message(const message_t& msg)
 {
   Shield* s = findById(msg.id);
   if (s)

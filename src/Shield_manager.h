@@ -13,7 +13,7 @@ class Shield_manager
   using HitCallback = std::function<void(uint8_t shieldId)>;
 
   void setGlobalHitCallback(HitCallback cb);
-  void handle_message(const uint8_t* mac, const message_t& msg);
+  void handle_message(const message_t& msg);
   void addShield(Shield* shield);
   int getShieldCount() const;
 

@@ -21,17 +21,17 @@
 const char* apSsid = "Strzelinca";
 const char* apPass = "inzynierDomu";
 
-enum class Program
-{
-  havy_fire,
-  dynamic,
-  cover_fiire,
-  training,
-  hostage,
-  none
-};
+// enum class Program
+// {
+//   havy_fire,
+//   dynamic,
+//   cover_fiire,
+//   training,
+//   hostage,
+//   none
+// };
 
-Program program;
+// Program program;
 
 class LGFX : public lgfx::LGFX_Device
 {
@@ -262,23 +262,23 @@ void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
                 mac[5],
                 receivedMsg.id,
                 receivedMsg.value);
-
+  shield_manager.handle_message(receivedMsg);
   // lv_label_set_text(ui_Label, receivedMsg.text);
 }
 
 static unsigned long hv_start_ms = 0;
 void hv_start(void)
 {
-  program = Program::havy_fire;
-  hv_start_ms = millis();
-  lv_textarea_set_text(ui_hvtimer, "0.00");
-  lv_textarea_set_text(ui_hvresult, "0");
+  // program = Program::havy_fire;
+  // hv_start_ms = millis();
+  // lv_textarea_set_text(ui_hvtimer, "0.00");
+  // lv_textarea_set_text(ui_hvresult, "0");
   // sendMessage();
 }
 
 void hv_stop(void)
 {
-  program = Program::none;
+  // program = Program::none;
 }
 
 void handleRoot()
@@ -372,7 +372,7 @@ void setup()
 
   esp_now_register_recv_cb(OnDataRecv);
 
-  program = Program::none;
+  // program = Program::none;
 }
 
 void loop()
@@ -380,26 +380,26 @@ void loop()
   lv_timer_handler();
   delay(5);
 
-  if (program == Program::havy_fire)
-  {
-    unsigned long now = millis();
-    float elapsed = (now - hv_start_ms) / 1000.0f; // ile sekund minęło
+  // if (program == Program::havy_fire)
+  // {
+  //   unsigned long now = millis();
+  //   float elapsed = (now - hv_start_ms) / 1000.0f; // ile sekund minęło
 
-    if (elapsed >= 10.0f)
-    {
-      elapsed = 10.0f;
-      program = Program::none;
-    }
+  //   if (elapsed >= 10.0f)
+  //   {
+  //     elapsed = 10.0f;
+  //     program = Program::none;
+  //   }
 
-    // zaokrąglenie do 2 miejsc, żeby np. 1.999 → 2.00
-    int centis = (int)(elapsed * 100 + 0.5f);
-    int sec = centis / 100;
-    int cs = centis % 100;
+  //   // zaokrąglenie do 2 miejsc, żeby np. 1.999 → 2.00
+  //   int centis = (int)(elapsed * 100 + 0.5f);
+  //   int sec = centis / 100;
+  //   int cs = centis % 100;
 
-    char buf[16];
-    snprintf(buf, sizeof(buf), "%d.%02d", sec, cs);
-    lv_textarea_set_text(ui_hvtimer, buf);
-  }
+  //   char buf[16];
+  //   snprintf(buf, sizeof(buf), "%d.%02d", sec, cs);
+  //   lv_textarea_set_text(ui_hvtimer, buf);
+  // }
 
   server.handleClient();
 }
