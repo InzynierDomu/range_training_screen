@@ -5,62 +5,62 @@
 
 #include "ui.h"
 
-void hv_start_clbk(lv_event_t * e)
+void hv_start_clbk(lv_event_t* e)
 {
-	// Your code here
+  hv_start();
 }
 
-void hv_stop_clbk(lv_event_t * e)
+void hv_stop_clbk(lv_event_t* e)
 {
-	// Your code here
+  hv_stop();
 }
 
-void hv_program_set(lv_event_t * e)
+void hv_program_set(lv_event_t* e)
 {
-	hv_start();
+  hv_open();
 }
 
-void cf_start_clbk(lv_event_t * e)
+void cf_start_clbk(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }
 
-void cf_stop_clbk(lv_event_t * e)
+void cf_stop_clbk(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }
 
-void dynamic_start_clbk(lv_event_t * e)
+void dynamic_start_clbk(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }
 
-void dynamic_stop_clbk(lv_event_t * e)
+void dynamic_stop_clbk(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }
 
-void training_start_clbk(lv_event_t * e)
+void training_start_clbk(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }
 
-void training_stop_clbk(lv_event_t * e)
+void training_stop_clbk(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }
 
-void hostage_start_clbk(lv_event_t * e)
+void hostage_start_clbk(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }
 
-void hostage_stop_clbk(lv_event_t * e)
+void hostage_stop_clbk(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }
 
-void hv_stop_clb(lv_event_t * e)
+void hv_stop_clb(lv_event_t* e)
 {
-	// Your code here
+  // Your code here
 }

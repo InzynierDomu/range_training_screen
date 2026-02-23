@@ -13,6 +13,11 @@ class Shoting_program
   {}
   virtual ~Shoting_program() {}
 
+  void open()
+  {
+    onOpen();
+  }
+
   void start()
   {
     resetTimer();
@@ -26,6 +31,11 @@ class Shoting_program
     onStop();
   }
 
+  void close()
+  {
+    onClose();
+  }
+
   void update()
   {
     if (!running)
@@ -37,7 +47,9 @@ class Shoting_program
 
   protected:
   virtual void onStart() = 0;
+  virtual void onOpen() = 0;
   virtual void onStop() = 0;
+  virtual void onClose() =0;
   virtual void onUpdate() = 0;
   virtual void drawUI() = 0;
 

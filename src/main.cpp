@@ -170,12 +170,12 @@ void switchProgram(std::unique_ptr<Shoting_program> program)
 {
   if (activeProgram)
   {
-    activeProgram->stop();
+    activeProgram->close();
   }
   activeProgram = std::move(program);
   if (activeProgram)
   {
-    activeProgram->start();
+    activeProgram->open();
   }
 }
 
@@ -284,7 +284,7 @@ void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
 }
 
 static unsigned long hv_start_ms = 0;
-void hv_start(void)
+void hv_open()
 {
   // program = Program::havy_fire;
   // hv_start_ms = millis();
@@ -294,7 +294,17 @@ void hv_start(void)
   switchProgram(std::make_unique<Havy_fire>(shield_manager));
 }
 
-void hv_stop(void)
+void hv_start()
+{
+  activeProgram->start();
+}
+
+void hv_stop()
+{
+  activeProgram->stop();
+}
+
+void hv_close()
 {
   // program = Program::none;
 }
@@ -418,6 +428,11 @@ void loop()
   //   snprintf(buf, sizeof(buf), "%d.%02d", sec, cs);
   //   lv_textarea_set_text(ui_hvtimer, buf);
   // }
+
+  if (activeProgram->is_running())
+  {
+    activeProgram->update();
+  }
 
   server.handleClient();
 }
