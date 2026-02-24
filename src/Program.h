@@ -23,6 +23,7 @@ class Shoting_program
     resetTimer();
     running = true;
     onStart();
+    drawUI();
   }
 
   void stop()
@@ -45,11 +46,16 @@ class Shoting_program
     drawUI();
   }
 
+  bool is_running()
+  {
+    return running;
+  }
+
   protected:
   virtual void onStart() = 0;
   virtual void onOpen() = 0;
   virtual void onStop() = 0;
-  virtual void onClose() =0;
+  virtual void onClose() = 0;
   virtual void onUpdate() = 0;
   virtual void drawUI() = 0;
 

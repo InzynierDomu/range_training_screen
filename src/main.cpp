@@ -428,10 +428,12 @@ void loop()
   //   snprintf(buf, sizeof(buf), "%d.%02d", sec, cs);
   //   lv_textarea_set_text(ui_hvtimer, buf);
   // }
-
-  if (activeProgram->is_running())
+  if (activeProgram)
   {
-    activeProgram->update();
+    if (activeProgram->is_running())
+    {
+      activeProgram->update();
+    }
   }
 
   server.handleClient();

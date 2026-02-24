@@ -14,4 +14,6 @@ class Havy_fire : public Shoting_program
   void onUpdate() override;
   void drawUI() override;
 
+  void update_timer();
+
 };
