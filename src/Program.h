@@ -22,6 +22,9 @@ class Shoting_program
   {
     resetTimer();
     running = true;
+
+    manager.setGlobalHitCallback([this](uint8_t shieldId) { this->onShieldHit(shieldId); });
+
     onStart();
     drawUI();
   }
@@ -29,6 +32,7 @@ class Shoting_program
   void stop()
   {
     running = false;
+    manager.setGlobalHitCallback(nullptr);
     onStop();
   }
 
@@ -58,6 +62,7 @@ class Shoting_program
   virtual void onClose() = 0;
   virtual void onUpdate() = 0;
   virtual void drawUI() = 0;
+  virtual void onShieldHit(uint8_t shieldId) = 0;
 
   void resetTimer()
   {

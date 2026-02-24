@@ -13,7 +13,9 @@ class Havy_fire : public Shoting_program
   void onClose() override;
   void onUpdate() override;
   void drawUI() override;
+  void onShieldHit(uint8_t shieldId) override;
 
-  void update_timer();
+  // void update_timer();
+  uint16_t hits;
 
 };

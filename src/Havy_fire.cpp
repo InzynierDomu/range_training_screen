@@ -35,6 +35,14 @@ void Havy_fire::drawUI()
   unsigned long hundredths = (elapsed % 1000) / 10; // Pobieramy dwie pierwsze cyfry milisekund
 
   sprintf(buffer, "%lu.%02lu", seconds, hundredths);
-//   snprintf(buf, sizeof(buf), "%d.%02d", sec, cs);
+  //   snprintf(buf, sizeof(buf), "%d.%02d", sec, cs);
   lv_textarea_set_text(ui_hvtimer, buffer);
+  // char buffer[2];
+  snprintf(buffer, sizeof(buffer), "%u", hits);
+  lv_textarea_set_text(ui_hvresult, buffer);
+}
+
+void Havy_fire::onShieldHit(uint8_t shieldId)
+{
+  hits++;
 }
