@@ -357,9 +357,9 @@ void setup()
 
   lv_timer_handler();
 
-  WiFi.mode(WIFI_AP_STA); // AP + (opcjonalnie STA)
+  WiFi.mode(WIFI_STA); // AP + (opcjonalnie STA)
 
-  WiFi.softAP(apSsid, apPass); // TODO: check
+  // WiFi.softAP(apSsid, apPass); // TODO: check
 
   if (esp_now_init() != ESP_OK)
   {
@@ -380,7 +380,7 @@ void setup()
 
   esp_now_peer_info_t peerInfo = {};
   memcpy(peerInfo.peer_addr, peerAddress, 6);
-  peerInfo.channel = 0; // ten sam kanał na obu ESP, 0 = aktualny
+  peerInfo.channel = 1; // ten sam kanał na obu ESP, 0 = aktualny
   peerInfo.encrypt = false;
 
   esp_err_t addStatus = esp_now_add_peer(&peerInfo);
