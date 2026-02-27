@@ -7,6 +7,7 @@ void Shield_manager::setGlobalHitCallback(HitCallback cb)
 
 void Shield_manager::handle_message(const message_t& msg)
 {
+  Serial.println("msg handle");
   Shield* s = findById(msg.id);
   if (s)
   {
@@ -14,7 +15,7 @@ void Shield_manager::handle_message(const message_t& msg)
     s->handle_message(&stateByte, 1); // aktualizuje stan wewnętrzny
 
     // Proxy: przekaż dalej do aktywnego programu
-    if (msg.value == shoted && globalHitCallback)
+    if (globalHitCallback)
     {
       globalHitCallback(msg.id);
     }
@@ -24,6 +25,12 @@ void Shield_manager::handle_message(const message_t& msg)
 void Shield_manager::addShield(Shield* shield)
 {
   shields.push_back(shield);
+}
+
+void Shield_manager::send_message(Shield_state state, uint8_t shield_id)
+{
+  auto shield = findById(shield_id);
+  shield->set_state(state);
 }
 
 int Shield_manager::getShieldCount() const

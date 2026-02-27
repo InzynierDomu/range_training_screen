@@ -10,6 +10,8 @@ void Havy_fire::onOpen()
 void Havy_fire::onStart()
 {
   Serial.println("hv start");
+  manager.send_message(Shield_state::ready, 2);
+  hits = 0;
 }
 
 void Havy_fire::onStop()
@@ -24,12 +26,10 @@ void Havy_fire::onClose()
 
 void Havy_fire::onUpdate()
 {
-  Serial.println("hv update");
 }
 
 void Havy_fire::drawUI()
 {
-  Serial.println("hv draw ui");
   char buffer[10]; // Tablica na tekst, np. "12.34\0"
   unsigned long seconds = elapsed / 1000;
   unsigned long hundredths = (elapsed % 1000) / 10; // Pobieramy dwie pierwsze cyfry milisekund
@@ -44,5 +44,6 @@ void Havy_fire::drawUI()
 
 void Havy_fire::onShieldHit(uint8_t shieldId)
 {
+  Serial.println("on hit");
   hits++;
 }

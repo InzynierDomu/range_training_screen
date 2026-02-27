@@ -15,6 +15,7 @@ class Shield_manager
   void setGlobalHitCallback(HitCallback cb);
   void handle_message(const message_t& msg);
   void addShield(Shield* shield);
+  void send_message(Shield_state state, uint8_t shield_id);
   int getShieldCount() const;
 
   private:
