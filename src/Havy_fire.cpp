@@ -6,12 +6,14 @@
 void Havy_fire::onOpen()
 {
   Serial.println("hv open");
+  manager.set_all_inactive();
 }
 void Havy_fire::onStart()
 {
   Serial.println("hv start");
-  manager.send_message(Shield_state::ready, 2);
   hits = 0;
+  id_actve_shield = manager.get_random_id();
+  manager.send_message(Shield_state::ready, id_actve_shield);
 }
 
 void Havy_fire::onStop()
@@ -26,6 +28,10 @@ void Havy_fire::onClose()
 
 void Havy_fire::onUpdate()
 {
+  if (elapsed > 10000)
+  {
+    stop();
+  }
 }
 
 void Havy_fire::drawUI()
@@ -46,4 +52,6 @@ void Havy_fire::onShieldHit(uint8_t shieldId)
 {
   Serial.println("on hit");
   hits++;
+  id_actve_shield = manager.get_random_id();
+  manager.send_message(Shield_state::ready, id_actve_shield);
 }
