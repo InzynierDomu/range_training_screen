@@ -145,8 +145,6 @@ bool loadShieldsConfig(const char* filename)
 
   for (JsonObject obj : arr)
   {
-    uint8_t id = obj["id"] | 0;
-
     uint8_t mac[6];
     JsonArray macArr = obj["mac"].as<JsonArray>();
     if (!macArr || macArr.size() != 6)
@@ -156,6 +154,8 @@ bool loadShieldsConfig(const char* filename)
     {
       mac[i] = macArr[i].as<uint8_t>();
     }
+
+    uint8_t id = shield_manager.macToId(mac);
 
     auto* shield = new Shield(id, mac);
     shield_manager.addShield(shield);
@@ -270,16 +270,8 @@ void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
 void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
 {
   memcpy(&receivedMsg, data, sizeof(receivedMsg));
-  Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: ID=%d, Value=%d",
-                mac[0],
-                mac[1],
-                mac[2],
-                mac[3],
-                mac[4],
-                mac[5],
-                receivedMsg.id,
-                receivedMsg.value);
-  shield_manager.handle_message(receivedMsg);
+  Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: Value=%d", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], receivedMsg.value);
+  shield_manager.handle_message(receivedMsg, mac);
   // lv_label_set_text(ui_Label, receivedMsg.text);
 }
 

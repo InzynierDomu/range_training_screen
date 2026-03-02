@@ -5,10 +5,10 @@ void Shield_manager::setGlobalHitCallback(HitCallback cb)
   globalHitCallback = cb;
 }
 
-void Shield_manager::handle_message(const message_t& msg)
+void Shield_manager::handle_message(const message_t& msg, const uint8_t* mac)
 {
   Serial.println("msg handle");
-  Shield* s = findById(msg.id);
+  Shield* s = findById(macToId(mac));
   if (s)
   {
     uint8_t stateByte = msg.value;
@@ -17,7 +17,7 @@ void Shield_manager::handle_message(const message_t& msg)
     // Proxy: przekaż dalej do aktywnego programu
     if (globalHitCallback)
     {
-      globalHitCallback(msg.id);
+      globalHitCallback(macToId(mac));
     }
   }
 }
@@ -59,4 +59,9 @@ Shield* Shield_manager::findById(uint8_t id)
       return s;
   }
   return nullptr;
+}
+uint8_t Shield_manager::macToId(const uint8_t* mac)
+{
+  // XOR ostatnich 3 oktetów – unikalność wystarczająca dla małej sieci
+  return mac[3] ^ mac[4] ^ mac[5];
 }

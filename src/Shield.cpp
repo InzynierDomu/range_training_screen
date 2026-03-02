@@ -38,8 +38,7 @@ void Shield::handle_message(const uint8_t* data, int len) {}
 
 void Shield::send_esp_now(uint8_t value)
 {
-  message_t sendMsg;
-  sendMsg.id = 1; // todo move id master board
+  message_t sendMsg; // todo move id master board
   sendMsg.value = value;
   Serial.println("Sending via esp now");
 
