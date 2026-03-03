@@ -56,7 +56,9 @@ uint8_t Shield_manager::get_random_id(uint8_t last_id)
     return shields[number]->get_id();
   }
   else
+  {
     return get_full_random_id();
+  }
 }
 
 void Shield_manager::set_all_inactive()
