@@ -12,7 +12,7 @@ void Havy_fire::onStart()
 {
   Serial.println("hv start");
   hits = 0;
-  id_actve_shield = manager.get_random_id();
+  id_actve_shield = manager.get_full_random_id();
   manager.send_message(Shield_state::ready, id_actve_shield);
 }
 
@@ -54,7 +54,6 @@ void Havy_fire::onShieldHit(uint8_t shieldId)
 {
   Serial.println("on hit");
   hits++;
-  id_actve_shield = manager.get_random_id();
-
+  id_actve_shield = manager.get_random_id(shieldId);
   manager.send_message(Shield_state::ready, id_actve_shield);
 }
