@@ -17,7 +17,8 @@ class Shield_manager
   void addShield(Shield* shield);
   void send_message(Shield_state state, uint8_t shield_id);
   int getShieldCount() const;
-  uint8_t get_random_id();
+  uint8_t get_full_random_id();
+  uint8_t get_random_id(uint8_t last_id);
   void set_all_inactive();
   uint8_t macToId(const uint8_t* mac);
 

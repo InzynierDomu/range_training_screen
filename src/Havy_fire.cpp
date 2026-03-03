@@ -19,6 +19,7 @@ void Havy_fire::onStart()
 void Havy_fire::onStop()
 {
   Serial.println("hv stop");
+  manager.set_all_inactive();
 }
 
 void Havy_fire::onClose()
@@ -54,6 +55,6 @@ void Havy_fire::onShieldHit(uint8_t shieldId)
   Serial.println("on hit");
   hits++;
   id_actve_shield = manager.get_random_id();
-  delay(80);
+
   manager.send_message(Shield_state::ready, id_actve_shield);
 }

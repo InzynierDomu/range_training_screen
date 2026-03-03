@@ -38,10 +38,25 @@ int Shield_manager::getShieldCount() const
   return shields.size();
 }
 
-uint8_t Shield_manager::get_random_id()
+uint8_t Shield_manager::get_full_random_id()
 {
   uint8_t number = random(getShieldCount() - 1);
   return shields[number]->get_id();
+}
+
+uint8_t Shield_manager::get_random_id(uint8_t last_id)
+{
+  if (getShieldCount() > 1)
+  {
+    uint8_t number;
+    do
+    {
+      number = get_full_random_id();
+    } while (number != last_id);
+    return shields[number]->get_id();
+  }
+  else
+    return get_full_random_id();
 }
 
 void Shield_manager::set_all_inactive()
