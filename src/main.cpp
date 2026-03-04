@@ -1,5 +1,6 @@
 #include "Frame.h"
 #include "Havy_fire.h"
+#include "LGFX.h"
 #include "Program.h"
 #include "Shield.h"
 #include "Shield_manager.h"
@@ -8,7 +9,6 @@
 
 #include <Arduino.h>
 #include <ArduinoJson.h>
-#include <LovyanGFX.hpp>
 #include <SD.h>
 #include <SPI.h>
 #include <WebServer.h>
@@ -24,89 +24,75 @@
 const char* apSsid = "Strzelinca";
 const char* apPass = "inzynierDomu";
 
-// enum class Program
-// {
-//   havy_fire,
-//   dynamic,
-//   cover_fiire,
-//   training,
-//   hostage,
-//   none
-// };
-
-// Program program;
-
-class LGFX : public lgfx::LGFX_Device
-{
-  public:
-  lgfx::Bus_RGB _bus_instance;
-  lgfx::Panel_RGB _panel_instance;
-  LGFX(void)
-  {
-    {
-      auto cfg = _bus_instance.config();
-      cfg.panel = &_panel_instance;
-
-      cfg.pin_d0 = GPIO_NUM_15; // B0
-      cfg.pin_d1 = GPIO_NUM_7; // B1
-      cfg.pin_d2 = GPIO_NUM_6; // B2
-      cfg.pin_d3 = GPIO_NUM_5; // B3
-      cfg.pin_d4 = GPIO_NUM_4; // B4
-
-      cfg.pin_d5 = GPIO_NUM_9; // G0
-      cfg.pin_d6 = GPIO_NUM_46; // G1
-      cfg.pin_d7 = GPIO_NUM_3; // G2
-      cfg.pin_d8 = GPIO_NUM_8; // G3
-      cfg.pin_d9 = GPIO_NUM_16; // GS4
-      cfg.pin_d10 = GPIO_NUM_1; // G5
-
-      cfg.pin_d11 = GPIO_NUM_14; // R0
-      cfg.pin_d12 = GPIO_NUM_21; // R1
-      cfg.pin_d13 = GPIO_NUM_47; // R2
-      cfg.pin_d14 = GPIO_NUM_48; // R3
-      cfg.pin_d15 = GPIO_NUM_45; // R4
-
-      cfg.pin_henable = GPIO_NUM_41;
-      cfg.pin_vsync = GPIO_NUM_40;
-      cfg.pin_hsync = GPIO_NUM_39;
-      cfg.pin_pclk = GPIO_NUM_0;
-      cfg.freq_write = 15000000;
-
-      cfg.hsync_polarity = 0;
-      cfg.hsync_front_porch = 40;
-      cfg.hsync_pulse_width = 48;
-      cfg.hsync_back_porch = 40;
-
-      cfg.vsync_polarity = 0;
-      cfg.vsync_front_porch = 1;
-      cfg.vsync_pulse_width = 31;
-      cfg.vsync_back_porch = 13;
-
-      cfg.pclk_active_neg = 1;
-      cfg.de_idle_high = 0;
-      cfg.pclk_idle_high = 0;
-
-      _bus_instance.config(cfg);
-    }
-    {
-      auto cfg = _panel_instance.config();
-      cfg.memory_width = 800;
-      cfg.memory_height = 480;
-      cfg.panel_width = 800;
-      cfg.panel_height = 480;
-      cfg.offset_x = 0;
-      cfg.offset_y = 0;
-      _panel_instance.config(cfg);
-    }
-    _panel_instance.setBus(&_bus_instance);
-    setPanel(&_panel_instance);
-  }
-};
-
-
 Shield_manager shield_manager;
 std::unique_ptr<Shoting_program> activeProgram;
-// globalny lub dostępny w main
+// class LGFX : public lgfx::LGFX_Device
+// {
+//   public:
+//   lgfx::Bus_RGB _bus_instance;
+//   lgfx::Panel_RGB _panel_instance;
+//   LGFX(void)
+//   {
+//     {
+//       auto cfg = _bus_instance.config();
+//       cfg.panel = &_panel_instance;
+
+//       cfg.pin_d0 = GPIO_NUM_15; // B0
+//       cfg.pin_d1 = GPIO_NUM_7; // B1
+//       cfg.pin_d2 = GPIO_NUM_6; // B2
+//       cfg.pin_d3 = GPIO_NUM_5; // B3
+//       cfg.pin_d4 = GPIO_NUM_4; // B4
+
+//       cfg.pin_d5 = GPIO_NUM_9; // G0
+//       cfg.pin_d6 = GPIO_NUM_46; // G1
+//       cfg.pin_d7 = GPIO_NUM_3; // G2
+//       cfg.pin_d8 = GPIO_NUM_8; // G3
+//       cfg.pin_d9 = GPIO_NUM_16; // GS4
+//       cfg.pin_d10 = GPIO_NUM_1; // G5
+
+//       cfg.pin_d11 = GPIO_NUM_14; // R0
+//       cfg.pin_d12 = GPIO_NUM_21; // R1
+//       cfg.pin_d13 = GPIO_NUM_47; // R2
+//       cfg.pin_d14 = GPIO_NUM_48; // R3
+//       cfg.pin_d15 = GPIO_NUM_45; // R4
+
+//       cfg.pin_henable = GPIO_NUM_41;
+//       cfg.pin_vsync = GPIO_NUM_40;
+//       cfg.pin_hsync = GPIO_NUM_39;
+//       cfg.pin_pclk = GPIO_NUM_0;
+//       cfg.freq_write = 15000000;
+
+//       cfg.hsync_polarity = 0;
+//       cfg.hsync_front_porch = 40;
+//       cfg.hsync_pulse_width = 48;
+//       cfg.hsync_back_porch = 40;
+
+//       cfg.vsync_polarity = 0;
+//       cfg.vsync_front_porch = 1;
+//       cfg.vsync_pulse_width = 31;
+//       cfg.vsync_back_porch = 13;
+
+//       cfg.pclk_active_neg = 1;
+//       cfg.de_idle_high = 0;
+//       cfg.pclk_idle_high = 0;
+
+//       _bus_instance.config(cfg);
+//     }
+//     {
+//       auto cfg = _panel_instance.config();
+//       cfg.memory_width = 800;
+//       cfg.memory_height = 480;
+//       cfg.panel_width = 800;
+//       cfg.panel_height = 480;
+//       cfg.offset_x = 0;
+//       cfg.offset_y = 0;
+//       _panel_instance.config(cfg);
+//     }
+//     _panel_instance.setBus(&_bus_instance);
+//     setPanel(&_panel_instance);
+//   }
+// };
+
 bool loadShieldsConfig(const char* filename)
 {
   if (!SD.begin())
@@ -179,19 +165,12 @@ void switchProgram(std::unique_ptr<Shoting_program> program)
   }
 }
 
-// Struktura wiadomości - musi być identyczna na obu urządzeniach
-// typedef struct
-// {
-//   int id;
-//   uint8_t value;
-// } message_t;
-
 message_t receivedMsg; // Przechowuje odebraną wiadomość
-// message_t sendMsg; // Wiadomość do wysłania
+
 WebServer server(80);
 
-uint8_t peerAddress[] = {
-    0x3C, 0xE9, 0x0E, 0x7F, 0x30, 0x58}; // MAC urządzenia do którego będzie wysyłana wiadomość, trzeba odczytać tam i wpisać tutaj
+// uint8_t peerAddress[] = {
+//     0x3C, 0xE9, 0x0E, 0x7F, 0x30, 0x58}; // MAC urządzenia do którego będzie wysyłana wiadomość, trzeba odczytać tam i wpisać tutaj
 
 LGFX lcd;
 
@@ -229,10 +208,10 @@ void my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
 
       data->point.x = touch_last_x;
       data->point.y = touch_last_y;
-      Serial.print("Data x ");
-      Serial.println(data->point.x);
-      Serial.print("Data y ");
-      Serial.println(data->point.y);
+      // Serial.print("Data x ");
+      // Serial.println(data->point.x);
+      // Serial.print("Data y ");
+      // Serial.println(data->point.y);
     }
     else if (touch_released())
     {
@@ -245,44 +224,22 @@ void my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
   }
   delay(15);
 }
-
-// wysyłanie wiadomości
-// void sendMessage()
-// {
-//   sendMsg.id = 1; // id dla porządku
-//   sendMsg.value = 1; // dummy value
-//   Serial.println("Sending via esp now");
-
-//   esp_err_t result = esp_now_send(peerAddress, (uint8_t*)&sendMsg, sizeof(sendMsg));
-//   if (result != ESP_OK)
-//   {
-//     Serial.println(result);
-//     Serial.println("Sending error");
-//   }
-// }
 void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
 {
   Serial.print("Sending: ");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "ok" : "error");
 }
 
-// ta funkcja jest wywoływana jak przychodzi wiadomość po esp now, np. od slave można wykorzsytać do czegoś np. myData.value, myData.msg
 void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
 {
   memcpy(&receivedMsg, data, sizeof(receivedMsg));
   Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: Value=%d", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], receivedMsg.value);
   shield_manager.handle_message(receivedMsg, mac);
-  // lv_label_set_text(ui_Label, receivedMsg.text);
 }
 
 static unsigned long hv_start_ms = 0;
 void hv_open()
 {
-  // program = Program::havy_fire;
-  // hv_start_ms = millis();
-  // lv_textarea_set_text(ui_hvtimer, "0.00");
-  // lv_textarea_set_text(ui_hvresult, "0");
-  // sendMessage();
   switchProgram(std::make_unique<Havy_fire>(shield_manager));
 }
 
@@ -371,24 +328,25 @@ void setup()
   esp_now_register_send_cb(OnDataSent);
 
   esp_now_peer_info_t peerInfo = {};
-  memcpy(peerInfo.peer_addr, peerAddress, 6);
-  peerInfo.channel = 1; // ten sam kanał na obu ESP, 0 = aktualny
-  peerInfo.encrypt = false;
-
-  esp_err_t addStatus = esp_now_add_peer(&peerInfo);
-  Serial.print("add_peer status: ");
-  Serial.println(addStatus);
-
-
-  if (addStatus != ESP_OK)
-  {
-    Serial.println("adding peer error");
-  }
 
   if (loadShieldsConfig("/config.json"))
   {
     Serial.printf("Załadowano tarcze");
   }
+
+  // memcpy(peerInfo.peer_addr, peerAddress, 6);
+  // peerInfo.channel = 1; // ten sam kanał na obu ESP, 0 = aktualny
+  // peerInfo.encrypt = false;
+
+  // esp_err_t addStatus = esp_now_add_peer(&peerInfo);
+  // Serial.print("add_peer status: ");
+  // Serial.println(addStatus);
+  shield_manager.add_peers();
+
+  // if (addStatus != ESP_OK)
+  // {
+  //   Serial.println("adding peer error");
+  // }
 
   esp_now_register_recv_cb(OnDataRecv);
 

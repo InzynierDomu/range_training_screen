@@ -1,5 +1,7 @@
 #include "Shield_manager.h"
 
+#include <esp_now.h>
+
 void Shield_manager::setGlobalHitCallback(HitCallback cb)
 {
   globalHitCallback = cb;
@@ -12,7 +14,7 @@ void Shield_manager::handle_message(const message_t& msg, const uint8_t* mac)
   if (s)
   {
     uint8_t stateByte = msg.value;
-    s->handle_message(&stateByte, 1); // aktualizuje stan wewnętrzny
+    // s->handle_message(&stateByte, 1); // aktualizuje stan wewnętrzny
 
     // Proxy: przekaż dalej do aktywnego programu
     if (globalHitCallback)
@@ -81,4 +83,24 @@ uint8_t Shield_manager::macToId(const uint8_t* mac)
 {
   // XOR ostatnich 3 oktetów – unikalność wystarczająca dla małej sieci
   return mac[3] ^ mac[4] ^ mac[5];
+}
+
+void Shield_manager::add_peers()
+{
+  esp_now_peer_info_t peerInfo = {};
+  peerInfo.channel = 1; // ten sam kanał na obu ESP, 0 = aktualny
+  peerInfo.encrypt = false;
+
+  for (auto* s : shields)
+  {
+    memcpy(peerInfo.peer_addr, s->get_addres(), 6);
+    esp_err_t addStatus = esp_now_add_peer(&peerInfo);
+    Serial.print("add_peer status: ");
+    Serial.println(addStatus);
+
+    if (addStatus != ESP_OK)
+    {
+      Serial.println("adding peer error");
+    }
+  }
 }
