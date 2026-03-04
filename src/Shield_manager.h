@@ -21,6 +21,7 @@ class Shield_manager
   uint8_t get_random_id(uint8_t last_id);
   void set_all_inactive();
   uint8_t macToId(const uint8_t* mac);
+   void add_peers();
 
   private:
   Shield* findById(uint8_t id);
