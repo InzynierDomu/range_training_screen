@@ -4,9 +4,13 @@
 #include "Shield.h"
 #include "Shield_manager.h"
 #include "actions.h"
+#include "config.h"
+#include "logger.h"
 #include "ui.h"
 
 #include <Arduino.h>
+
+static const char* TAG = "Main";
 #include <ArduinoJson.h>
 #include <LovyanGFX.hpp>
 #include <SD.h>
@@ -21,8 +25,8 @@
 #include <vector>
 
 
-const char* apSsid = "Strzelinca";
-const char* apPass = "inzynierDomu";
+const char* apSsid = AP_SSID;
+const char* apPass = AP_PASS;
 
 // enum class Program
 // {
@@ -111,35 +115,34 @@ bool loadShieldsConfig(const char* filename)
 {
   if (!SD.begin())
   {
-    Serial.println("no SD card");
+    LOG_E(TAG, "brak karty SD");
   }
   else
   {
-    Serial.println("SD card ok");
+    LOG_I(TAG, "karta SD OK");
   }
 
   File file = SD.open(filename);
   if (!file)
   {
-    Serial.println("❌ Nie można otworzyć pliku konfiguracji.");
+    LOG_E(TAG, "nie można otworzyć pliku konfiguracji: %s", filename);
     return false;
   }
 
-  // Szacowane 1–2kB wystarczy przy kilku tarczach
-  StaticJsonDocument<2048> doc;
+  StaticJsonDocument<SHIELDS_CONFIG_JSON_SIZE> doc;
   DeserializationError error = deserializeJson(doc, file);
   file.close();
 
   if (error)
   {
-    Serial.printf("❌ Błąd parsowania JSON: %s\n", error.c_str());
+    LOG_E(TAG, "błąd parsowania JSON: %s", error.c_str());
     return false;
   }
 
   JsonArray arr = doc["shields"].as<JsonArray>();
   if (arr.isNull())
   {
-    Serial.println("⚠️ Nie znaleziono tablicy 'shields' w pliku.");
+    LOG_W(TAG, "nie znaleziono tablicy 'shields' w pliku");
     return false;
   }
 
@@ -160,7 +163,8 @@ bool loadShieldsConfig(const char* filename)
     auto* shield = new Shield(id, mac);
     shield_manager.addShield(shield);
 
-    Serial.printf("✅ Załadowano tarczę ID=%d, MAC=%02X:%02X:%02X:%02X:%02X:%02X\n", id, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
+    LOG_I(TAG, "załadowano tarczę id=%d, MAC=%02X:%02X:%02X:%02X:%02X:%02X",
+          id, mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
   }
 
   return true;
@@ -190,8 +194,6 @@ message_t receivedMsg; // Przechowuje odebraną wiadomość
 // message_t sendMsg; // Wiadomość do wysłania
 WebServer server(80);
 
-uint8_t peerAddress[] = {
-    0x3C, 0xE9, 0x0E, 0x7F, 0x30, 0x58}; // MAC urządzenia do którego będzie wysyłana wiadomość, trzeba odczytać tam i wpisać tutaj
 
 LGFX lcd;
 
@@ -262,17 +264,19 @@ void my_touchpad_read(lv_indev_drv_t* indev_driver, lv_indev_data_t* data)
 // }
 void OnDataSent(const uint8_t* mac_addr, esp_now_send_status_t status)
 {
-  Serial.print("Sending: ");
-  Serial.println(status == ESP_NOW_SEND_SUCCESS ? "ok" : "error");
+  if (status == ESP_NOW_SEND_SUCCESS)
+    LOG_I(TAG, "ESP-NOW send OK");
+  else
+    LOG_W(TAG, "ESP-NOW send FAIL");
 }
 
 // ta funkcja jest wywoływana jak przychodzi wiadomość po esp now, np. od slave można wykorzsytać do czegoś np. myData.value, myData.msg
 void OnDataRecv(const uint8_t* mac, const uint8_t* data, int len)
 {
   memcpy(&receivedMsg, data, sizeof(receivedMsg));
-  Serial.printf("received from: %02X:%02X:%02X:%02X:%02X:%02X: Value=%d", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], receivedMsg.value);
+  LOG_I(TAG, "ESP-NOW recv od %02X:%02X:%02X:%02X:%02X:%02X, value=%d",
+        mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], receivedMsg.value);
   shield_manager.handle_message(receivedMsg, mac);
-  // lv_label_set_text(ui_Label, receivedMsg.text);
 }
 
 static unsigned long hv_start_ms = 0;
@@ -355,40 +359,36 @@ void setup()
 
   if (esp_now_init() != ESP_OK)
   {
-    Serial.println("Blad inicjalizacji ESP-NOW");
+    LOG_E(TAG, "błąd inicjalizacji ESP-NOW");
     return;
   }
+  LOG_I(TAG, "ESP-NOW zainicjalizowany");
 
   server.on("/", handleRoot);
   server.begin();
-  Serial.println("HTTP server started");
-
-  Serial.print("MAC: ");
-  Serial.println(WiFi.macAddress());
-  Serial.println(WiFi.localIP());
-  Serial.println(WiFi.channel());
+  LOG_I(TAG, "HTTP server uruchomiony");
+  LOG_I(TAG, "MAC: %s, IP: %s, kanał: %d",
+        WiFi.macAddress().c_str(),
+        WiFi.localIP().toString().c_str(),
+        WiFi.channel());
 
   esp_now_register_send_cb(OnDataSent);
 
   esp_now_peer_info_t peerInfo = {};
-  memcpy(peerInfo.peer_addr, peerAddress, 6);
-  peerInfo.channel = 1; // ten sam kanał na obu ESP, 0 = aktualny
+  memcpy(peerInfo.peer_addr, PEER_MAC_LEGACY, sizeof(PEER_MAC_LEGACY));
+  peerInfo.channel = ESPNOW_CHANNEL;
   peerInfo.encrypt = false;
 
   esp_err_t addStatus = esp_now_add_peer(&peerInfo);
-  Serial.print("add_peer status: ");
-  Serial.println(addStatus);
-
-
   if (addStatus != ESP_OK)
-  {
-    Serial.println("adding peer error");
-  }
+    LOG_W(TAG, "add_peer error: %d", addStatus);
+  else
+    LOG_I(TAG, "peer dodany");
 
-  if (loadShieldsConfig("/config.json"))
-  {
-    Serial.printf("Załadowano tarcze");
-  }
+  if (loadShieldsConfig(SHIELDS_CONFIG_FILE))
+    LOG_I(TAG, "załadowano tarcze (%d szt.)", shield_manager.getShieldCount());
+  else
+    LOG_W(TAG, "nie załadowano tarcz — start programu będzie niemożliwy");
 
   esp_now_register_recv_cb(OnDataRecv);
 
