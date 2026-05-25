@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stddef.h>
+#include <stdint.h>
 
 // ─── Log levels — muszą być #define (używane w #if w logger.h) ───────────────
 // LOG_LEVEL_NONE  0  — brak logów
@@ -12,7 +13,8 @@
 #define LOG_LEVEL_WARN  2
 #define LOG_LEVEL_INFO  3
 
-#define LOG_LEVEL LOG_LEVEL_INFO
+#define LOG_LEVEL    LOG_LEVEL_INFO
+#define LOG_SD_LEVEL LOG_LEVEL_WARN  // co trafia na kartę SD (NONE = wyłączone)
 
 // ─── WiFi / AP ────────────────────────────────────────────────────────────────
 constexpr const char* AP_SSID = "Strzelinca";
@@ -26,6 +28,7 @@ constexpr uint8_t ESPNOW_CHANNEL = 1;
 // ─── SD / config ──────────────────────────────────────────────────────────────
 constexpr const char* SHIELDS_CONFIG_FILE = "/config.json";
 constexpr size_t SHIELDS_CONFIG_JSON_SIZE = 2048;
+constexpr const char* LOG_SD_FILE = "/log.txt";
 
 // ─── Havy Fire ────────────────────────────────────────────────────────────────
 constexpr unsigned long HV_DURATION_MS = 10000UL;
