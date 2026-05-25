@@ -1,5 +1,8 @@
 #include "Shield_manager.h"
+#include "config.h"
 #include "logger.h"
+
+#include <esp_now.h>
 
 static const char* TAG = "ShieldMgr";
 
@@ -20,9 +23,6 @@ void Shield_manager::handle_message(const message_t& msg, const uint8_t* mac)
   }
 
   LOG_I(TAG, "odebrano wiadomość od tarczy id=%d, value=%d", id, msg.value);
-  uint8_t stateByte = msg.value;
-  s->handle_message(&stateByte, 1);
-
   if (globalHitCallback)
   {
     globalHitCallback(id);
@@ -99,4 +99,21 @@ Shield* Shield_manager::findById(uint8_t id)
 uint8_t Shield_manager::macToId(const uint8_t* mac)
 {
   return mac[3] ^ mac[4] ^ mac[5];
+}
+
+void Shield_manager::add_peers()
+{
+  esp_now_peer_info_t peerInfo = {};
+  peerInfo.channel = ESPNOW_CHANNEL;
+  peerInfo.encrypt = false;
+
+  for (auto* s : shields)
+  {
+    memcpy(peerInfo.peer_addr, s->get_addres(), 6);
+    esp_err_t status = esp_now_add_peer(&peerInfo);
+    if (status != ESP_OK)
+      LOG_W(TAG, "add_peers: błąd dodawania peera id=%d, status=%d", s->get_id(), status);
+    else
+      LOG_I(TAG, "add_peers: dodano peera id=%d", s->get_id());
+  }
 }

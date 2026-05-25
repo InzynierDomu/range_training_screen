@@ -23,7 +23,7 @@ class Shield
   Shield_state get_state() const;
   void set_state(Shield_state state);
   void set_hit_callback(HitCallback callback);
-  void handle_message(const uint8_t* data, int len);
+  uint8_t* get_addres();
 
   private:
   void send_esp_now(uint8_t value);
