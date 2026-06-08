@@ -16,6 +16,6 @@ class Havy_fire : public Shoting_program
   void onShieldHit(uint8_t shieldId) override;
 
   // void update_timer();
-  uint16_t hits;
-  uint8_t id_actve_shield;
+  uint16_t hits = 0;
+  uint8_t id_actve_shield = 0;
 };
